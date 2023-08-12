@@ -150,7 +150,7 @@ class sLevelData:
 		self.pTSOData = struct.unpack("<I", file.read(4))[0]
 		self.pAnimData = struct.unpack("<I", file.read(4))[0]
 		self.pVISData = struct.unpack("<I", file.read(4))[0]
-		self.pSVG = struct.unpack("<I", file.read(4))[0]
+		self.pSVF = struct.unpack("<I", file.read(4))[0]
 		self.pAColGrid = struct.unpack("<I", file.read(4))[0]
 		self.pAColGridInt = struct.unpack("<I", file.read(4))[0]
 		self.pCameras = struct.unpack("<I", file.read(4))[0]
@@ -158,6 +158,10 @@ class sLevelData:
 		self.pSFXData = struct.unpack("<I", file.read(4))[0]
 		self.pMVARList = struct.unpack("<I", file.read(4))[0]
 		self.pGeneralText = struct.unpack("<I", file.read(4))[0]
+		self.pStartData = struct.unpack("<I", file.read(4))[0]
+		self.pPickUpTable = struct.unpack("<I", file.read(4))[0]
+		self.pPickUpPosData = struct.unpack("<I", file.read(4))[0]
+		self.pAINode = struct.unpack("<I", file.read(4))[0]
 
 class TextGroup:
 	def __init__(self, file: io.BufferedReader):
@@ -281,7 +285,8 @@ class ColPoly:
 		self.vertexCount = struct.unpack("<B", file.read(1))[0]
 		self.gid = struct.unpack("<B", file.read(1))[0]
 		self.ma = struct.unpack("<B", file.read(1))[0]
-		self.material = MaterialType(struct.unpack("<B", file.read(1))[0])
+		mat_val = struct.unpack("<B", file.read(1))[0]
+		self.material = MaterialType(mat_val) if mat_val in MaterialType._value2member_map_ else mat_val
 		self.d = struct.unpack("<f", file.read(4))[0]
 		self.bbMaxZ = struct.unpack("<f", file.read(4))[0]
 		self.sid = struct.unpack("<H", file.read(2))[0]
@@ -330,6 +335,64 @@ class MaterialType(enum.Enum):
 	BARREL_HOLLOW = 39
 	BARREL_SOLID = 40
 	BOING = 41
+
+class sAINodeClass:
+	def __init__(self, file: io.BufferedReader):
+		if file:
+			self.read(file)
+
+	def read(self, file: io.BufferedReader):
+		self.noNodesSingle = struct.unpack("<H", file.read(2))[0]
+		self.noNodesLink = struct.unpack("<H", file.read(2))[0]
+		self.pNode = struct.unpack("<I", file.read(4))[0]
+		self.iNodeSearcher = struct.unpack("<i", file.read(4))[0]
+		self.startNode = struct.unpack("<i", file.read(4))[0]
+		self.nodeTotalDist = struct.unpack("<i", file.read(4))[0]
+		self.iMinX = struct.unpack("<i", file.read(4))[0]
+		self.iMinZ = struct.unpack("<i", file.read(4))[0]
+		self.iMaxX = struct.unpack("<i", file.read(4))[0]
+		self.iMaxZ = struct.unpack("<i", file.read(4))[0]
+		self.pRecurseSCR = struct.unpack("<I", file.read(4))[0]
+		self.possibleAIRoutes = [struct.unpack("<4h", file.read(8)) for i in range(64)]
+
+class sAINode:
+	def __init__(self, file: io.BufferedReader):
+		if file:
+			self.read(file)
+
+	def read(self, file: io.BufferedReader):
+		self.priority = struct.unpack("<B", file.read(1))[0]
+		self.startNode = struct.unpack("<B", file.read(1))[0]
+		self.checkNext = struct.unpack("<2B", file.read(2))
+		self.iFinishDist = struct.unpack("<i", file.read(4))
+		self.prev = struct.unpack("<2I", file.read(8))
+		self.next = struct.unpack("<2I", file.read(8))
+		self.node = [struct.unpack("<4h", file.read(8)) for i in range(2)]
+		self.centre = struct.unpack("<4h", file.read(8))
+		self.overCentre = struct.unpack("<4h", file.read(8))
+		self.boundsMin = struct.unpack("<2h", file.read(4))
+		self.boundsMax = struct.unpack("<2h", file.read(4))
+		self.link = sAINodeLinkInfo(file)
+	
+	def json(self):
+		j = vars(self)
+		del j["link"]
+
+		return j
+
+class sAINodeLinkInfo:
+	def __init__(self, file: io.BufferedReader):
+		if file:
+			self.read(file)
+
+	def read(self, file: io.BufferedReader):
+		self.svForwardDir = [struct.unpack("<4h", file.read(8)) for i in range(2)]
+		self.svForwardOverDir = [struct.unpack("<4h", file.read(8)) for i in range(2)]
+		self.dist = struct.unpack("<2i", file.read(8))
+		self.dir = struct.unpack("<B", file.read(1))[0]
+		self.incline = struct.unpack("<B", file.read(1))[0]
+		self.flags = struct.unpack("<B", file.read(1))[0]
+		self.onwater = struct.unpack("<B", file.read(1))[0]
 
 def readString(file: io.BufferedReader) -> str:
 	string = ""
