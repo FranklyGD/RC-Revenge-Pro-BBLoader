@@ -16,10 +16,10 @@ def main():
 		levelFilePath = targetPath
 		decompressed_levelFolderPath = f"{os.path.split(targetPath)[0]}\\Decompressed\\"
 
-	if not os.path.exists(decompressed_levelFolderPath):
-		os.makedirs(decompressed_levelFolderPath)
-
 	with open(levelFilePath, "rb") as file:
+		if not os.path.exists(decompressed_levelFolderPath):
+			os.makedirs(decompressed_levelFolderPath)
+
 		bbHeader = sBBHeader(file)
 
 		if not flags or "NO_SRAM" not in flags and ("SFX_AMBIENT" in flags or "SFX_GENERIC" in flags):
