@@ -394,6 +394,26 @@ class sAINodeLinkInfo:
 		self.flags = struct.unpack("<B", file.read(1))[0]
 		self.onwater = struct.unpack("<B", file.read(1))[0]
 
+class sPickupRes:
+	def __init__(self, file: io.BufferedReader):
+		if file:
+			self.read(file)
+
+	def read(self, file: io.BufferedReader):
+		self.pRendObjHead = struct.unpack("<I", file.read(4))[0]
+		self.numPickups = struct.unpack("<I", file.read(4))[0]
+
+class sPickupPos:
+	def __init__(self, file: io.BufferedReader):
+		if file:
+			self.read(file)
+
+	def read(self, file: io.BufferedReader):
+		self.visFlag0 = struct.unpack("<I", file.read(4))[0]
+		self.visFlag1 = struct.unpack("<I", file.read(4))[0]
+		self.x, self.y, self.z = struct.unpack("<3h", file.read(6))
+		self.type = struct.unpack("<H", file.read(2))[0]
+
 def readString(file: io.BufferedReader) -> str:
 	string = ""
 	while True:

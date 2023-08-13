@@ -128,8 +128,20 @@ def main():
 			with open(decompressed_levelFolderPath + f"ai.json", "w") as text_file:
 				text_file.write(json.dumps([aiNode.json() for aiNode in aiNodes], ensure_ascii=True, indent="\t"))
 
+		pickupPoss = []
+		if Lvl.pPickUpPosData != 0:
+			rpPickUpPosData = Lvl.pPickUpPosData - bbHeader.dRAMHeader.pCurr
+			file.seek(rpPickUpPosData, os.SEEK_SET)
+
+			PickupRes = sPickupRes(file)
+
+			pickupPoss = [sPickupPos(file) for i in range(PickupRes.numPickups)]
+
+			with open(decompressed_levelFolderPath + f"pickups.json", "w") as text_file:
+				text_file.write(json.dumps([vars(pickupPos) for pickupPos in pickupPoss], ensure_ascii=True, indent="\t"))
+
 		# Export to a model!
-		export(decompressed_levelFolderPath, collisionPolys, aiNodes)
+		export(decompressed_levelFolderPath, collisionPolys, aiNodes, pickupPoss)
 
 if __name__ == "__main__":
 	main()

@@ -1,7 +1,7 @@
 import base64, json
 from RCRPDataTypes import *
 
-def export(output_path: str, collisionPolys: list[ColPoly], aiNodes: list[sAINode]):
+def export(output_path: str, collisionPolys: list[ColPoly], aiNodes: list[sAINode], pickupPoss: list[sPickupPos]):
 	gltf = {
 		"asset": {
 			"generator": "BBLoader",
@@ -295,6 +295,16 @@ def export(output_path: str, collisionPolys: list[ColPoly], aiNodes: list[sAINod
 			"byteLength": len(buffer),
 			"uri": "data:application/octet-stream;base64," + base64.b64encode(bytes(buffer)).decode(),
 		})
+	
+	if pickupPoss:
+		for pickupPos in pickupPoss:
+			rootNode["children"].append(len(gltf["nodes"]))
+
+			gltf["nodes"].append({
+				"translation": [pickupPos.x, pickupPos.z, pickupPos.y],
+				"name" : "Pickup"
+			})
+
 
 	with open(output_path + f"model.gltf", "w") as model_file:
 		model_file.write(json.dumps(gltf, ensure_ascii=True, indent="\t"))
