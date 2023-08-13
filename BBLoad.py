@@ -90,44 +90,46 @@ def main():
 			collisionPolys.append(ColPoly(file))
 
 		# AI
-			
-		rpAINodeClass = Lvl.pAINode - bbHeader.dRAMHeader.pCurr
-		file.seek(rpAINodeClass, os.SEEK_SET)
-		
-		# Apparently most of the data within the class seems not used properly in the BBK file
-		# The whole structure is used more in live RAM than stored. Only 3 pieces of data is stored here:
-		# Node Count, Node Links, Array of Nodes
 
-		# AINodeClass = sAINodeClass(file) # <- That ain't it chief
+		aiNodes = []
+		if Lvl.pAINode != 0:
+			rpAINodeClass = Lvl.pAINode - bbHeader.dRAMHeader.pCurr
+			file.seek(rpAINodeClass, os.SEEK_SET)
 
-		# This is how we actually read...
+			# Apparently most of the data within the class seems not used properly in the BBK file
+			# The whole structure is used more in live RAM than stored. Only 3 pieces of data is stored here:
+			# Node Count, Node Links, Array of Nodes
 
-		noNodesSingle = struct.unpack("<H", file.read(2))[0]
-		noNodesLink = struct.unpack("<H", file.read(2))[0] # Currently unused
-		
-		rpfirstNode = file.tell()
-		aiNodes = [sAINode(file) for i in range(noNodesSingle)]
-		
-		# Convert AINode pointers to indices
-		for aiNode in aiNodes:
-			next = aiNode.next
-			prev = aiNode.prev
-			aiNode.next = [-1,-1]
-			aiNode.prev = [-1,-1]
-			for i in range(2):
-				pNextNode = next[i]
-				if pNextNode != 0:
-					aiNode.next[i] = (pNextNode - rpfirstNode - bbHeader.dRAMHeader.pCurr) // 0x6c
-				
-				pPrevNode = prev[i]
-				if pPrevNode != 0:
-					aiNode.prev[i] = (pPrevNode - rpfirstNode - bbHeader.dRAMHeader.pCurr) // 0x6c
+			# AINodeClass = sAINodeClass(file) # <- That ain't it chief
 
-		with open(decompressed_levelFolderPath + f"ai.json", "w") as text_file:
-			text_file.write(json.dumps([aiNode.json() for aiNode in aiNodes], ensure_ascii=True, indent="\t"))
+			# This is how we actually read...
+
+			noNodesSingle = struct.unpack("<H", file.read(2))[0]
+			noNodesLink = struct.unpack("<H", file.read(2))[0] # Currently unused
+
+			rpfirstNode = file.tell()
+			aiNodes = [sAINode(file) for i in range(noNodesSingle)]
+
+			# Convert AINode pointers to indices
+			for aiNode in aiNodes:
+				next = aiNode.next
+				prev = aiNode.prev
+				aiNode.next = [-1,-1]
+				aiNode.prev = [-1,-1]
+				for i in range(2):
+					pNextNode = next[i]
+					if pNextNode != 0:
+						aiNode.next[i] = (pNextNode - rpfirstNode - bbHeader.dRAMHeader.pCurr) // 0x6c
+
+					pPrevNode = prev[i]
+					if pPrevNode != 0:
+						aiNode.prev[i] = (pPrevNode - rpfirstNode - bbHeader.dRAMHeader.pCurr) // 0x6c
+
+			with open(decompressed_levelFolderPath + f"ai.json", "w") as text_file:
+				text_file.write(json.dumps([aiNode.json() for aiNode in aiNodes], ensure_ascii=True, indent="\t"))
 
 		# Export to a model!
 		export(decompressed_levelFolderPath, collisionPolys, aiNodes)
-			
+
 if __name__ == "__main__":
 	main()
