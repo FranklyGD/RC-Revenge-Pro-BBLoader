@@ -18,12 +18,7 @@ def export(output_path: str, collisionPolys: list[ColPoly], aiNodes: list[sAINod
 		"nodes": [
 			{
 				"children": [],
-				"matrix": [
-					-0.001, 0.0, 0.0, 0.0,
-					0.0, 0.0, 0.001, 0.0,
-					0.0, 0.001, 0.0, 0.0,
-					0.0, 0.0, 0.0, 1.0
-				],
+				"scale": [0.001, 0.001, 0.001],
 				"name": "Lvl"
 			}
 		],
@@ -66,10 +61,10 @@ def export(output_path: str, collisionPolys: list[ColPoly], aiNodes: list[sAINod
 			oi = len(vertices)
 			if Vector.dot(Vector.cross(polyVertices[1] - polyVertices[0], polyVertices[2] - polyVertices[0]), polyNormal) < 0:
 				for i in range(polyVertexCount - 2):
-					indices.extend([oi, oi + 2 + i, oi + 1 + i])
+					indices.extend([oi, oi + 1 + i, oi + 2 + i])
 			else:
 				for i in range(polyVertexCount - 2):
-					indices.extend([oi, oi + 1 + i, oi + 2 + i])
+					indices.extend([oi, oi + 2 + i, oi + 1 + i])
 
 			vertices.extend(polyVertices)
 			normals.extend([polyNormal] * polyVertexCount)
@@ -114,12 +109,12 @@ def export(output_path: str, collisionPolys: list[ColPoly], aiNodes: list[sAINod
 				buffer.extend(struct.pack("<i", i))
 
 			for v in range(vertexCount):
-				buffer.extend(struct.pack("<3f", vertices[v].x, vertices[v].y, vertices[v].z))
+				buffer.extend(struct.pack("<3f", vertices[v].x, vertices[v].z, vertices[v].y))
 
 			for v in range(vertexCount):
 				normal = normals[v]
 				length = normal.length()
-				buffer.extend(struct.pack("<3f", normal.x / length, normal.y / length, normal.z / length))
+				buffer.extend(struct.pack("<3f", normal.x / length, normal.z / length, normal.y / length))
 
 			gltf["materials"].append({
 				"name": material.name if type(material) is MaterialType else f"MTL_{material}"
@@ -246,7 +241,7 @@ def export(output_path: str, collisionPolys: list[ColPoly], aiNodes: list[sAINod
 			buffer.extend(struct.pack("<i", i))
 
 		for v in range(vertexCount):
-			buffer.extend(struct.pack("<3f", vertices[v][0], vertices[v][2], vertices[v][1]))
+			buffer.extend(struct.pack("<3f", vertices[v][0], vertices[v][1], vertices[v][2]))
 
 		bufferViewCount = len(gltf["bufferViews"])
 		gltf["accessors"].extend([
@@ -301,7 +296,8 @@ def export(output_path: str, collisionPolys: list[ColPoly], aiNodes: list[sAINod
 			rootNode["children"].append(len(gltf["nodes"]))
 
 			gltf["nodes"].append({
-				"translation": [pickupPos.x, pickupPos.z, pickupPos.y],
+				"translation": [pickupPos.x, pickupPos.y, pickupPos.z],
+				"scale": [0.01, 0.01, 0.01],
 				"name" : "Pickup"
 			})
 
@@ -334,7 +330,7 @@ def export(output_path: str, collisionPolys: list[ColPoly], aiNodes: list[sAINod
 				colors = mesh["colors"]
 
 			oi = len(vertices)
-			indices.extend([oi, oi + 2, oi + 1])
+			indices.extend([oi, oi + 1, oi + 2])
 
 			vertices.extend(triangle["vertices"])
 			normals.extend([triangle["normal"]] * 3)
@@ -385,14 +381,14 @@ def export(output_path: str, collisionPolys: list[ColPoly], aiNodes: list[sAINod
 				buffer.extend(struct.pack("<i", i))
 
 			for v in range(vertexCount):
-				buffer.extend(struct.pack("<3f", vertices[v].x, vertices[v].z, vertices[v].y))
+				buffer.extend(struct.pack("<3f", vertices[v].x, vertices[v].y, vertices[v].z))
 
 			for v in range(vertexCount):
 				normal = normals[v]
 				length = normal.length()
 				if length == 0:
 					length = 1
-				buffer.extend(struct.pack("<3f", normal.x / length, normal.z / length, normal.y / length))
+				buffer.extend(struct.pack("<3f", normal.x / length, normal.y / length, normal.z / length))
 			
 			for v in range(vertexCount):
 				uv = uvs[v]
