@@ -7,13 +7,13 @@ import enum
 bbHeader = None
 
 class sBBHeader:
-	def __init__(self, file: io.BufferedReader):
+	def __init__(self, file: io.RawIOBase):
 		if file:
 			self.read(file)
 			global bbHeader
 			bbHeader = self
 
-	def read(self, file: io.BufferedReader):
+	def read(self, file: io.RawIOBase):
 		self.checksum = struct.unpack("<I", file.read(4))[0]
 		self.magic = struct.unpack("<I", file.read(4))[0]
 		self.sRAMOffset = struct.unpack("<I", file.read(4))[0]
@@ -27,11 +27,11 @@ class sBBHeader:
 		self.handlesHeader = sBBHandlesHeader(file)
 
 class sBBSRAMHeader:
-	def __init__(self, file: io.BufferedReader):
+	def __init__(self, file: io.RawIOBase):
 		if file:
 			self.read(file)
 
-	def read(self, file: io.BufferedReader):
+	def read(self, file: io.RawIOBase):
 		self.checksum = struct.unpack("<I", file.read(4))[0]
 		self.magic = struct.unpack("<I", file.read(4))[0]
 		self.dataSize = struct.unpack("<I", file.read(4))[0]
@@ -43,11 +43,11 @@ class sBBSRAMHeader:
 		self.effectList = [EffectStruct(file) for i in range(140)]
 
 class EffectStruct:
-	def __init__(self, file: io.BufferedReader):
+	def __init__(self, file: io.RawIOBase):
 		if file:
 			self.read(file)
 
-	def read(self, file: io.BufferedReader):
+	def read(self, file: io.RawIOBase):
 		self.Addr = struct.unpack("<i", file.read(4))[0]
 		self.Size = struct.unpack("<i", file.read(4))[0]
 		self.ImgAddr = struct.unpack("<i", file.read(4))[0]
@@ -58,22 +58,22 @@ class EffectStruct:
 		self.LoopAddr = struct.unpack("<i", file.read(4))[0]
 
 class sBBVRAMHeader:
-	def __init__(self, file: io.BufferedReader):
+	def __init__(self, file: io.RawIOBase):
 		if file:
 			self.read(file)
 
-	def read(self, file: io.BufferedReader):
+	def read(self, file: io.RawIOBase):
 		self.checksum = struct.unpack("<I", file.read(4))[0]
 		self.magic = struct.unpack("<I", file.read(4))[0]
 		self.dataSize = struct.unpack("<I", file.read(4))[0]
 		self.texData = texData(file)
 
 class texData:
-	def __init__(self, file: io.BufferedReader):
+	def __init__(self, file: io.RawIOBase):
 		if file:
 			self.read(file)
 
-	def read(self, file: io.BufferedReader):
+	def read(self, file: io.RawIOBase):
 		self.texMemoryHandle = struct.unpack("<I", file.read(4))[0]
 		self.pInterTex = struct.unpack("<I", file.read(4))[0]
 		self.currentInterTex = struct.unpack("<I", file.read(4))[0]
@@ -93,11 +93,11 @@ class texData:
 		self.pTexTypeConv = struct.unpack("<I", file.read(4))[0]
 
 class pigeonHole:
-	def __init__(self, file: io.BufferedReader):
+	def __init__(self, file: io.RawIOBase):
 		if file:
 			self.read(file)
 
-	def read(self, file: io.BufferedReader):
+	def read(self, file: io.RawIOBase):
 		self.xStart = struct.unpack("<h", file.read(2))[0]
 		self.yStart = struct.unpack("<h", file.read(2))[0]
 		self.xSize = struct.unpack("<h", file.read(2))[0]
@@ -108,11 +108,11 @@ class pigeonHole:
 		self.type = struct.unpack("<h", file.read(2))[0]
 
 class sBBDRAMHeader:
-	def __init__(self, file: io.BufferedReader):
+	def __init__(self, file: io.RawIOBase):
 		if file:
 			self.read(file)
 
-	def read(self, file: io.BufferedReader):
+	def read(self, file: io.RawIOBase):
 		self.checksum = struct.unpack("<I", file.read(4))[0]
 		self.magic = struct.unpack("<I", file.read(4))[0]
 		self.dataSize = struct.unpack("<I", file.read(4))[0]
@@ -120,32 +120,32 @@ class sBBDRAMHeader:
 		self.pCurr = struct.unpack("<I", file.read(4))[0]
 
 class sBBHandlesHeader:
-	def __init__(self, file: io.BufferedReader):
+	def __init__(self, file: io.RawIOBase):
 		if file:
 			self.read(file)
 
-	def read(self, file: io.BufferedReader):
+	def read(self, file: io.RawIOBase):
 		self.checksum = struct.unpack("<I", file.read(4))[0]
 		self.magic = struct.unpack("<I", file.read(4))[0]
 		self.dataSize = struct.unpack("<I", file.read(4))[0]
 
 class sFELevelData: # Front End Specific
-	def __init__(self, file: io.BufferedReader):
+	def __init__(self, file: io.RawIOBase):
 		if file:
 			self.read(file)
 
-	def read(self, file: io.BufferedReader):
+	def read(self, file: io.RawIOBase):
 		file.seek(-0x140, os.SEEK_END)
 		self.pLvl = struct.unpack("<I", file.read(4))[0]
 		self.pBorderSet = struct.unpack("<I", file.read(4))[0]
 		self.pColourSet = struct.unpack("<I", file.read(4))[0]
 
 class sLevelData:
-	def __init__(self, file: io.BufferedReader):
+	def __init__(self, file: io.RawIOBase):
 		if file:
 			self.read(file)
 
-	def read(self, file: io.BufferedReader):
+	def read(self, file: io.RawIOBase):
 		self.pALFData = struct.unpack("<I", file.read(4))[0]
 		self.pTSOData = struct.unpack("<I", file.read(4))[0]
 		self.pAnimData = struct.unpack("<I", file.read(4))[0]
@@ -164,11 +164,11 @@ class sLevelData:
 		self.pAINode = struct.unpack("<I", file.read(4))[0]
 
 class TextGroup:
-	def __init__(self, file: io.BufferedReader):
+	def __init__(self, file: io.RawIOBase):
 		if file:
 			self.read(file)
 
-	def read(self, file: io.BufferedReader):
+	def read(self, file: io.RawIOBase):
 		self.localizations = {}
 		rpTextTranslation = file.tell()
 		for i in range(4):
@@ -194,11 +194,11 @@ class LocalizationLanguage(enum.Enum):
 	ES = 3
 
 class sColGridPXS:
-	def __init__(self, file: io.BufferedReader):
+	def __init__(self, file: io.RawIOBase):
 		if file:
 			self.read(file)
 
-	def read(self, file: io.BufferedReader):
+	def read(self, file: io.RawIOBase):
 		self.min = Vector.read(file)
 		self.max = Vector.read(file)
 		self.extra = Vector.read(file)
@@ -219,7 +219,7 @@ class Vector:
 		self.data = [data[0], data[1], data[2]]
 
 	@classmethod
-	def read(cls, file: io.BufferedReader, pad: bool = False):
+	def read(cls, file: io.RawIOBase, pad: bool = False):
 		data = struct.unpack("<3f", file.read(12))
 		if pad:
 			file.seek(4, os.SEEK_CUR)
@@ -275,11 +275,11 @@ class Vector:
 		return math.sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
 
 class ColPoly:
-	def __init__(self, file: io.BufferedReader):
+	def __init__(self, file: io.RawIOBase):
 		if file:
 			self.read(file)
 
-	def read(self, file: io.BufferedReader):
+	def read(self, file: io.RawIOBase):
 		self.normal = Vector.read(file, True)
 		self.vertices = [Vector.read(file, True) for i in range(4)]
 		self.vertexCount = struct.unpack("<B", file.read(1))[0]
@@ -337,11 +337,11 @@ class MaterialType(enum.Enum):
 	BOING = 41
 
 class sAINodeClass:
-	def __init__(self, file: io.BufferedReader):
+	def __init__(self, file: io.RawIOBase):
 		if file:
 			self.read(file)
 
-	def read(self, file: io.BufferedReader):
+	def read(self, file: io.RawIOBase):
 		self.noNodesSingle = struct.unpack("<H", file.read(2))[0]
 		self.noNodesLink = struct.unpack("<H", file.read(2))[0]
 		self.pNode = struct.unpack("<I", file.read(4))[0]
@@ -356,11 +356,11 @@ class sAINodeClass:
 		self.possibleAIRoutes = [struct.unpack("<4h", file.read(8)) for i in range(64)]
 
 class sAINode:
-	def __init__(self, file: io.BufferedReader):
+	def __init__(self, file: io.RawIOBase):
 		if file:
 			self.read(file)
 
-	def read(self, file: io.BufferedReader):
+	def read(self, file: io.RawIOBase):
 		self.priority = struct.unpack("<B", file.read(1))[0]
 		self.startNode = struct.unpack("<B", file.read(1))[0]
 		self.checkNext = struct.unpack("<2B", file.read(2))
@@ -373,7 +373,7 @@ class sAINode:
 		self.boundsMin = struct.unpack("<2h", file.read(4))
 		self.boundsMax = struct.unpack("<2h", file.read(4))
 		self.link = sAINodeLinkInfo(file)
-	
+
 	def json(self):
 		j = vars(self)
 		del j["link"]
@@ -381,11 +381,11 @@ class sAINode:
 		return j
 
 class sAINodeLinkInfo:
-	def __init__(self, file: io.BufferedReader):
+	def __init__(self, file: io.RawIOBase):
 		if file:
 			self.read(file)
 
-	def read(self, file: io.BufferedReader):
+	def read(self, file: io.RawIOBase):
 		self.svForwardDir = [struct.unpack("<4h", file.read(8)) for i in range(2)]
 		self.svForwardOverDir = [struct.unpack("<4h", file.read(8)) for i in range(2)]
 		self.dist = struct.unpack("<2i", file.read(8))
@@ -395,26 +395,78 @@ class sAINodeLinkInfo:
 		self.onwater = struct.unpack("<B", file.read(1))[0]
 
 class sPickupRes:
-	def __init__(self, file: io.BufferedReader):
+	def __init__(self, file: io.RawIOBase):
 		if file:
 			self.read(file)
 
-	def read(self, file: io.BufferedReader):
+	def read(self, file: io.RawIOBase):
 		self.pRendObjHead = struct.unpack("<I", file.read(4))[0]
 		self.numPickups = struct.unpack("<I", file.read(4))[0]
 
 class sPickupPos:
-	def __init__(self, file: io.BufferedReader):
+	def __init__(self, file: io.RawIOBase):
 		if file:
 			self.read(file)
 
-	def read(self, file: io.BufferedReader):
+	def read(self, file: io.RawIOBase):
 		self.visFlag0 = struct.unpack("<I", file.read(4))[0]
 		self.visFlag1 = struct.unpack("<I", file.read(4))[0]
 		self.x, self.y, self.z = struct.unpack("<3h", file.read(6))
 		self.type = struct.unpack("<H", file.read(2))[0]
 
-def readString(file: io.BufferedReader) -> str:
+class sRdrVUShape:
+	def __init__(self, file: io.RawIOBase):
+		if file:
+			self.read(file)
+
+	def read(self, file: io.RawIOBase):
+		self.version = struct.unpack("<f", file.read(4))[0]
+		self.rdrFlags = struct.unpack("<I", file.read(4))[0]
+		self.mat = [Vector.read(file) for i in range(3)]
+		self.pos = Vector.read(file)
+		self.numTex = struct.unpack("<i", file.read(4))[0]
+		self.numTri = struct.unpack("<i", file.read(4))[0]
+		self.radius = struct.unpack("<f", file.read(4))[0]
+		self.pTex = struct.unpack("<I", file.read(4))[0]
+		self.pTri = struct.unpack("<I", file.read(4))[0]
+		self.numFixups = struct.unpack("<I", file.read(4))[0]
+		self.pTexFixList = struct.unpack("<I", file.read(4))[0]
+		self.pAlpha = struct.unpack("<I", file.read(4))[0]
+
+class sDmaTag:
+	def __init__(self, file: io.RawIOBase):
+		if file:
+			self.read(file)
+
+	def read(self, file: io.RawIOBase):
+		self.qwc = struct.unpack("<h", file.read(2))[0]
+		self.mark = struct.unpack("<B", file.read(1))[0]
+		self.id = struct.unpack("<B", file.read(1))[0]
+		self.next = struct.unpack("<I", file.read(4))[0]
+		self.vif = [VIFcode(file) for i in range(2)]
+
+class VIFcode:
+	def __init__(self, file: io.RawIOBase):
+		if file:
+			self.read(file)
+
+	def read(self, file: io.RawIOBase):
+		self.imm = struct.unpack("<H", file.read(2))[0]
+		self.num = struct.unpack("<B", file.read(1))[0]
+		self.cmd = struct.unpack("<B", file.read(1))[0]
+
+
+class DmaTagID(enum.Enum):
+	REFE = 0
+	CNT = 1
+	NEXT = 2
+	REF = 3
+	REFS = 4
+	CALL = 5
+	RET = 6
+	END = 7
+
+def readString(file: io.RawIOBase) -> str:
 	string = ""
 	while True:
 		b = file.read(1)
